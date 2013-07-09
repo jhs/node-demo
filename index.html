@@ -1,0 +1,55 @@
+<head>
+<script src="/dronestream/nodecopter-client.js"></script>
+<style>
+  .vid {
+    height: 360px;
+    width: 640px;
+    border: 1px solid black;
+  }
+
+  #xpre { display: none; }
+</style>
+</head>
+<body>
+  <span id="state"></span>: <span id="altitude"></span> meters.
+  <div id="droneStream" class="vid"></div>
+
+  <button onclick="socket.send('takeoff')">Take off</button>
+  <button onclick="socket.send('turn')">Turn</button>
+  <button onclick="socket.send('land')">Land</button>
+
+  <ul>
+    <li> Battery: <span id="battery"></span>%
+    <li> Pitch: <span id="pitch"></span>
+    <li> Roll: <span id="roll"></span>
+    <li> Yaw: <span id="yaw"></span>
+  </ul>
+  <pre id="pre"></pre>
+
+  <script>
+    function $(id) {
+      return document.getElementById(id)
+    }
+
+    new NodecopterStream(document.getElementById("droneStream"))
+
+    var socket = new WebSocket('ws://' + window.location.host + '/socket')
+    socket.onmessage = onmessage
+
+    function onmessage(event) {
+      var state = JSON.parse(event.data)
+      if(window.show)
+        console.log('message: %o', state)
+
+      $('altitude').innerHTML = state.altitude || ''
+      $('state').innerHTML = state.controlState || ''
+      $('battery').innerHTML = state.battery || ""
+
+      $('pitch').innerHTML   = state.pitch
+      $('roll').innerHTML   = state.roll
+      $('yaw').innerHTML   = state.yaw
+
+      $('pre').innerHTML = state.extra || ''
+    }
+  </script>
+</body>
